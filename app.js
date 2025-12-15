@@ -11,6 +11,8 @@ mongoose
   })
   .catch(console.error);
 
+const routes = require("./routes");
+app.use(routes);
 app.use(express.json());
 app.use("/", mainRouter);
 
