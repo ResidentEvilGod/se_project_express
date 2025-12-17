@@ -1,50 +1,137 @@
-const clothingItem = require("../models/clothingItem");
+const ClothingItem = require("../models/clothingItem");
 
 const createItem = (req, res) => {
-  const { name, weather, imageURL } = req.body;
+  const { name, weather, imageUrl } = req.body;
 
-  clothingItem
-    .create({ name, weather, imageURL })
-    .then((item) => {
-      res.send({ data: item });
-    })
-    .catch((e) => {
-      res.status(500).send({ message: `Error`, e });
+  ClothingItem.create({
+    name,
+    weather,
+    imageUrl,
+    owner: req.user._id,
+  })
+    .then((item) => res.status(201).send(item))
+    .catch((err) => {
+      console.error(err);
+
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: err.message });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
     });
 };
 
 const getItems = (req, res) => {
-  clothingItem
-    .find({})
+  ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch((e) => {
-      res.status(500).send({ message: "Get Items Failed", e });
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send({ message: "An error has occurred on the server" });
     });
 };
 
 const updateItem = (req, res) => {
-  const { itemId } = req.param;
-  const { imageURL } = req.body;
+  const { itemId } = req.params;
+  const { name, weather, imageUrl } = req.body;
 
-  clothingItem
-    .findByIdAndUpdate(itemId, { $set: { imageURL } })
+  ClothingItem.findByIdAndUpdate(
+    itemId,
+    { name, weather, imageUrl },
+    { new: true, runValidators: true }
+  )
     .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => {
-      res.status(500).send({ message: "Error fromgetItems", e });
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(404).send({ message: "Item not found" });
+      }
+
+      if (err.name === "CastError" || err.name === "ValidationError") {
+        return res.status(400).send({ message: err.message });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
     });
 };
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  console.log(itemId);
-  clothingItem
-    .findByIdAndDelete(itemId)
+
+  ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => res.status(204).send({}))
-    .catch((e) => {
-      res.status(500).send({ message: "Error from deleteItem", e });
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(404).send({ message: "Item not found" });
+      }
+
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid item id" });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
     });
 };
 
-module.exports = { createItem, getItems, updateItem, deleteItem };
+const likeItem = (req, res) => {
+  const { itemId } = req.params;
+
+  ClothingItem.findByIdAndUpdate(
+    itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  )
+    .orFail()
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(404).send({ message: "Item not found" });
+      }
+
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid item id" });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
+    });
+};
+
+const dislikeItem = (req, res) => {
+  const { itemId } = req.params;
+
+  ClothingItem.findByIdAndUpdate(
+    itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  )
+    .orFail()
+    .then((item) => res.status(200).send(item))
+    .catch((err) => {
+      console.error(err);
+
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(404).send({ message: "Item not found" });
+      }
+
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid item id" });
+      }
+
+      return res.status(500).send({ message: "An error has occurred on the server" });
+    });
+};
+
+module.exports = {
+  createItem,
+  getItems,
+  updateItem,
+  deleteItem,
+  likeItem,
+  dislikeItem,
+};
