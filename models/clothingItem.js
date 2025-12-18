@@ -1,53 +1,39 @@
-const User = require("../models/user");
+const mongoose = require("mongoose");
+const validator = require("validator");
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send({ message: "An error has occurred on the server" });
-    });
-};
+const clothingItemSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    minlength: 2,
+    maxlength: 30,
+  },
+  weather: {
+    type: String,
+    required: true,
+    enum: ["hot", "warm", "cold"],
+  },
+  imageUrl: {
+    type: String,
+    required: true,
+    validate: {
+      validator: (v) => validator.isURL(v),
+      message: "You must enter a valid URL",
+    },
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "user",
+  },
+  likes: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+    default: [],
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
-const createUser = (req, res) => {
-  const { name, avatar } = req.body;
-
-  User.create({ name, avatar })
-    .then((user) => res.status(201).send(user))
-    .catch((err) => {
-      console.error(err);
-
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
-      }
-
-      return res
-        .status(500)
-        .send({ message: "An error has occurred on the server" });
-    });
-};
-
-const getUser = (req, res) => {
-  const { userId } = req.params;
-
-  User.findById(userId)
-    .orFail()
-    .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      console.error(err);
-
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "User not found" });
-      }
-
-      if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid user id" });
-      }
-
-      return res
-        .status(500)
-        .send({ message: "An error has occurred on the server" });
-    });
-};
-
-module.exports = { getUsers, createUser, getUser };
+module.exports = mongoose.model("clothingItem", clothingItemSchema);
