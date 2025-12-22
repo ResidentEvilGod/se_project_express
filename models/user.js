@@ -42,7 +42,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Custom mongoose method for authenticating a user
 userSchema.statics.findUserByCredentials = function findUserByCredentials(
   email,
   password

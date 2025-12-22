@@ -24,7 +24,6 @@ const createUser = (req, res) => {
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then((user) => {
-      // `select: false` doesn't apply to newly created docs, so remove password manually
       const userObj = user.toObject();
       delete userObj.password;
       return res.status(201).send(userObj);
@@ -92,7 +91,6 @@ const getCurrentUser = (req, res) =>
 const updateProfile = (req, res) => {
   const { name, avatar } = req.body;
 
-  // Only allow updating name and avatar
   const updateData = {};
   if (typeof name === "string") updateData.name = name;
   if (typeof avatar === "string") updateData.avatar = avatar;

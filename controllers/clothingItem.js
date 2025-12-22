@@ -44,7 +44,7 @@ const updateItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     itemId,
     { name, weather, imageUrl },
-    { new: true, runValidators: true },
+    { new: true, runValidators: true }
   )
     .orFail()
     .then((item) => res.status(200).send(item))
@@ -69,7 +69,6 @@ const deleteItem = (req, res) => {
   ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
-      // Only the owner can delete their item
       if (item.owner.toString() !== req.user._id) {
         return res.status(FORBIDDEN).send({ message: "Forbidden" });
       }
@@ -97,7 +96,7 @@ const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     itemId,
     { $addToSet: { likes: req.user._id } },
-    { new: true },
+    { new: true }
   )
     .orFail()
     .then((item) => res.status(200).send(item))
@@ -122,7 +121,7 @@ const dislikeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     itemId,
     { $pull: { likes: req.user._id } },
-    { new: true },
+    { new: true }
   )
     .orFail()
     .then((item) => res.status(200).send(item))
