@@ -14,7 +14,7 @@ Before committing your code, make sure you edit the file `sprint.txt` in the roo
 
 ## Project Pitch video
 
-Check out [Project 13 pitch video](https://docs.google.com/document/d/1boJVLFfJ4AclsKSZIZzNgeyjoOjt7Ko4pt4mibMekh4/edit?usp=sharing), where I describe my
+Check out [Project 15 pitch video](https://docs.google.com/document/d/1boJVLFfJ4AclsKSZIZzNgeyjoOjt7Ko4pt4mibMekh4/edit?usp=sharing), where I describe my
 project and some challenges I faced while building it.
 
 
