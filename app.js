@@ -1,41 +1,37 @@
-const express = require("express");
-const mongoose = require("mongoose");
+require('dotenv').config();
 
-const mainRouter = require("./routes");
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const { errors } = require('celebrate');
 
-const { PORT = 3001 } = process.env;
+const mainRouter = require('./routes');
+const { PORT, DB_ADDRESS } = require('./utils/config');
+const { logger, requestLogger, errorLogger } = require('./middlewares/logger');
+const NotFoundError = require('./errors/not-found-error');
+const errorHandler = require('./middlewares/error-handler');
 
 const app = express();
 
-const cors = require("cors");
-
 mongoose
-  .connect("mongodb://127.0.0.1:27017/wtwr_db")
-  .catch((err) => console.error(err));
+  .connect(DB_ADDRESS)
+  .catch((err) => {
+    logger.error('MongoDB connection error', { error: err.message, stack: err.stack });
+  });
 
 app.use(express.json());
-
 app.use(cors());
 
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Server will crash now');
-  }, 0);
-});
+app.use(requestLogger);
 
-app.use("/", mainRouter);
+app.use('/', mainRouter);
 
-app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
+app.use((req, res, next) => next(new NotFoundError('Requested resource not found')));
 
-  const { statusCode = 500, message } = err;
+app.use(errorLogger);
 
-  return res.status(statusCode).send({
-    message:
-      statusCode === 500 ? "An error has occurred on the server" : message,
-  });
-});
+app.use(errors());
+
+app.use(errorHandler);
 
 app.listen(PORT);
