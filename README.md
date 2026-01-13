@@ -22,7 +22,7 @@ project and some challenges I faced while building it.
 https://github.com/ResidentEvilGod/se_project_express
 
 ## Domain Name 
-www.NickProject15.crabdance.com	
+www.nickproject15.evils.in
 
 ## Frontend link
 https://github.com/ResidentEvilGod/se_project_react
