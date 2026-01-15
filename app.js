@@ -1,3 +1,5 @@
+console.log('RUNNING APP.JS FROM:', __filename, 'CWD:', process.cwd());
+
 require('dotenv').config();
 
 const express = require('express');
