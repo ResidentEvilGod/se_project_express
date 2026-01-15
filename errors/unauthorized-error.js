@@ -1,8 +1,9 @@
+const { UNAUTHORIZED } = require('../utils/errors');
 const AppError = require('./app-error');
 
 class UnauthorizedError extends AppError {
   constructor(message = 'Authorization required') {
-    super(message, 401);
+    super(message, UNAUTHORIZED);
   }
 }
 
